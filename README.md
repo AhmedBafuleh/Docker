@@ -69,6 +69,7 @@ docker compose up -d → starts all the containers in detached mode.
 
 ## Step 5: Verify Everything is Running
 docker ps → This will list all running containers. You should see zookeeper, kafka, cassandra, postgres, influxdb, anaconda.
+<img width="1920" height="1200" alt="Screenshot (90)" src="https://github.com/user-attachments/assets/b3005791-941a-4caa-81d1-cd47e4eb0e04" />
 
 ## Step 6: Access Each Service
 PostgreSQL:
