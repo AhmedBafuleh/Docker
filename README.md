@@ -1,105 +1,185 @@
-# Docker
+
+# DevOps Final Project – Docker Compose System
+
+## Project Overview
+
+This project demonstrates the implementation of a multi-service environment using **Docker Compose**, representing a real-world data-driven trading system.
+The purpose is to showcase how **DevOps principles** such as automation, containerization, and continuous integration can be applied to deploy complex, interconnected services with minimal manual configuration.
 
 
-**(What & Why)**
+## Understanding DevOps and Docker
 
-Development Operations
-DevOps is a way of working that combines software development and IT operations, with the goal of delivering software faster, more reliably, and continuously through automation.
-Automation is making everything work with the least amount of human interaction for these types of processes: testing, deployment, monitoring, and code integration.  
-The key ideas here are to break down the wall between the developers and the operations team by using tools such as Docker, Kubernetes, Jenkins, and Git to make sure everything is automated and repeatable. The main idea is to focus on CI/CD (Continuous Integration, Continuous Delivery)
+**DevOps** is a methodology that integrates software development and IT operations to improve collaboration, speed, and reliability.
+Its goal is to automate repetitive tasks like testing, deployment, and monitoring ensuring **Continuous Integration (CI)** and **Continuous Delivery (CD)**.
 
-Now, let's talk about one of the tools that is used to do this job. Docker Compose is a tool that simplifies the process of managing complex applications that consist of multiple services, each running in its own Docker container. YAML is the file type that is used by Docker Compose to define the services of the application. It will hold the details of the Docker images to be used, port mappings, volumes for data persistence, network configurations, and dependencies between services.
+**Docker** enables developers to package applications and their dependencies into portable containers that can run consistently across any environment.
+**Docker Compose**, in particular, simplifies managing multi-container applications using a single configuration file (`docker-compose.yml`).
+
+In this project, Docker Compose automates the creation of containers, networks, and volumes for multiple interconnected services.
+This approach simulates how modern companies build scalable data pipelines and analytic platforms.
 
 
-**(Who is Who)**
-The system we created is a simulation of a real-world trading system, where multiple services work together as one. We get to learn how modern data platforms are  structured, where they use streaming and multiple databases to handle different types of data. What Docker Compose does is make this setup available on any device with one click, ensuring consistency.
-When we run the setup, all services start together (Zookeeper, Kafka, three databases, Anaconda). Docker will read the YAML file and create containers to run programs, networks to allow communication between them, and volumes to store data. 
+## System Architecture Overview
+
+The system simulates a **trading-data platform** composed of several services working together, each running inside its own container.
+Docker Compose ensures these services launch simultaneously, interact seamlessly, and maintain consistent configurations.
 
 ![Docker YAML](https://github.com/user-attachments/assets/174c4cd2-309e-4b09-9ad3-a2f0f74396f6)
 
-Relationships:
+### Components and Relationships
 
-Zookeeper → Kafka: Kafka needs Zookeeper to organize brokers.
+* **Zookeeper → Kafka**: Zookeeper manages Kafka brokers and coordinates their communication.
+* **Kafka → Databases**: Kafka streams incoming data into Cassandra, PostgreSQL, and InfluxDB.
+* **Anaconda ↔ Kafka & Databases**: Anaconda can produce and consume data through Kafka, while also querying databases directly.
 
-Kafka → Databases: Kafka streams incoming data into Cassandra, PostgreSQL, and InfluxDB.
+### Network Connections
 
-Anaconda ↔ Kafka & Databases: Anaconda can send (produce) data into Kafka or read (consume) data from Kafka, and also query databases directly.
+All services are connected through a custom Docker network (`trading-net`), which allows them to resolve each other by name.
 
-Connections:
-These services connect via the trading-net, and they can call each other by their service names. As a host, I will be able to access these services through their ports:
+| Service    | Port  | Purpose                    |
+| ---------- | ----- | -------------------------- |
+| PostgreSQL | 5432  | Relational database access |
+| Cassandra  | 9042  | Distributed NoSQL database |
+| InfluxDB   | 8086  | Time-series database       |
+| Kafka      | 29092 | Message streaming service  |
+| Anaconda   | 8888  | Data analytics environment |
 
-Postgres → 5432
-
-Cassandra → 9042
-
-InfluxDB → 8086
-
-Kafka → 29092
-
-Anaconda → 8888
-
-Lastly, we have the volumes where we store the data even if the service was deleted.
+Persistent **volumes** ensure that data is retained even when containers are stopped or recreated.
 
 
+## Step-by-Step Installation Guide (Windows)
 
-Installation step-by-step
--
+### Step 1: Install Docker Desktop
 
-## Step 1: Install Docker Desktop
-- Download Docker Desktop from [Docker website](https://www.docker.com/products/docker-desktop/).
-- Install it and make sure it is running.
+Download and install Docker Desktop from the [official website](https://www.docker.com/products/docker-desktop/).
+Once installed, ensure Docker Desktop is running.
+
 <img width="1920" height="1200" alt="Screenshot (81)" src="https://github.com/user-attachments/assets/4d93b385-da05-4fc1-ab82-375d77c63b82" />
 
-## Step 2: Create a Project Folder
-Open a terminal and run:
+
+### Step 2: Create a Project Folder
+
+Open the terminal inside Docker Desktop and create a directory for the project:
+
+```bash
 mkdir trading-tools-docker
 cd trading-tools-docker
+```
+
 <img width="1920" height="1200" alt="Screenshot (85)" src="https://github.com/user-attachments/assets/0a90b835-ece2-44e0-aa7e-895412488a2c" />
 
-## Step 3: Create the docker-compose.yml File
-Inside the folder, create a file named docker-compose.yml and paste the configuration.
+
+### Step 3: Create the `docker-compose.yml` File
+
+Inside the folder, create a new file named `docker-compose.yml` and paste the system configuration into it.
+
 <img width="1920" height="1200" alt="Screenshot (86)" src="https://github.com/user-attachments/assets/5b6f90db-2e40-431c-9b08-6990521cafb1" />
 
-## Step 4: Start the Services
-docker compose pull → downloads all the images (Kafka, Cassandra, etc.)
+
+### Step 4: Start the Services
+
+To pull all required images (Kafka, Cassandra, PostgreSQL, etc.):
+
+```bash
+docker compose pull
+```
+
 <img width="1920" height="1200" alt="Screenshot (88)" src="https://github.com/user-attachments/assets/180478b1-c5cc-480d-a44f-3030c67a9134" />
 
-docker compose up -d → starts all the containers in detached mode.
+Then start all containers in detached mode:
+
+```bash
+docker compose up -d
+```
+
 <img width="1920" height="1200" alt="Screenshot (89)" src="https://github.com/user-attachments/assets/96cfdba9-84ce-475f-ae6e-853e250c4f5a" />
 
-## Step 5: Verify Everything is Running
-docker ps → This will list all running containers. You should see zookeeper, kafka, cassandra, postgres, influxdb, anaconda.
+
+### Step 5: Verify Running Containers
+
+To confirm that all containers are active:
+
+```bash
+docker ps
+```
+
+You should see `zookeeper`, `kafka`, `cassandra`, `postgres`, `influxdb`, and `anaconda` listed.
+
 <img width="1920" height="1200" alt="Screenshot (90)" src="https://github.com/user-attachments/assets/b3005791-941a-4caa-81d1-cd47e4eb0e04" />
 
-## Step 6: Access Each Service
-PostgreSQL:
+
+### Step 6: Access Each Service
+
+**PostgreSQL**
+
+```bash
 docker exec -it postgres psql -U admin -d tradingdb
+```
+
 <img width="1920" height="1200" alt="Screenshot (91)" src="https://github.com/user-attachments/assets/397c8f3a-02ed-4d9b-b1c4-7144c2cccc15" />
 
-Cassandra:
+**Cassandra**
+
+```bash
 docker exec -it cassandra cqlsh
+```
+
 <img width="1920" height="1200" alt="Screenshot (92)" src="https://github.com/user-attachments/assets/a5dd16de-67ca-45e6-86b2-61a91cc36c03" />
 
-InfluxDB:
-Open your browser at http://localhost:8086
-Login: admin / admin12345
+**InfluxDB**
+Open your browser at [http://localhost:8086](http://localhost:8086)
+Login credentials:
+
+* Username: `admin`
+* Password: `admin12345`
+
 <img width="1920" height="1200" alt="Screenshot (93)" src="https://github.com/user-attachments/assets/482acd78-dcdd-4573-88c8-33e2cd704b8d" />
 
-Kafka:
-Reachable at localhost:29092. 
+**Kafka**
+Reachable at `localhost:29092`.
 
-Anaconda:
+**Anaconda**
+
+```bash
 docker exec -it anaconda bash
 conda --version
+```
+
 <img width="1920" height="1200" alt="Screenshot (95)" src="https://github.com/user-attachments/assets/7c259e50-863e-4a11-b9f7-f97ce64a4c22" />
 
-## Step 7: Networking
-All services are connected through one virtual Docker network called trading-net. This allows them to reach each other by name (postgres, kafka, cassandra, etc.).
 
-## Step 8: Persistence (Volumes)
-Data is stored in volumes, so it doesn’t get lost when containers stop.
-Check volumes:
+## Networking and Data Persistence
+
+All containers are connected through a single virtual Docker network named `trading-net`, enabling inter-container communication by service name.
+This eliminates the need for IP-based access and ensures easy scaling.
+
+### Persistent Volumes
+
+Docker volumes retain data even after containers are removed.
+You can list existing volumes with:
+
+```bash
 docker volume ls
+```
+
 <img width="1920" height="1200" alt="Screenshot (96)" src="https://github.com/user-attachments/assets/af081051-7ea5-4947-9b69-1420d0db0dcc" />
 
+
+## Learning Outcomes
+
+Through this project, the following key DevOps and containerization concepts were demonstrated and understood:
+
+1. **DevOps Automation:** Implementing CI/CD principles by automating deployment using Docker Compose.
+2. **Containerization:** Building isolated, reproducible environments for multiple services.
+3. **Networking:** Understanding how containers communicate via custom Docker networks.
+4. **Data Persistence:** Using volumes to maintain data consistency beyond container lifecycles.
+5. **Service Orchestration:** Running interconnected tools (Kafka, PostgreSQL, Cassandra, InfluxDB, Anaconda) in one coordinated environment.
+6. **Real-World Simulation:** Replicating the architecture of a streaming-based trading data platform.
+7. **Troubleshooting Skills:** Learning to inspect, restart, and manage services using Docker CLI commands.
+
+
+## Conclusion
+
+This project highlights the power of Docker and Docker Compose in simplifying complex system setups and promoting DevOps best practices.
+By automating multi-service deployment, maintaining consistency across environments, and ensuring data reliability through volumes, this system serves as both a practical demonstration and a learning milestone in containerized infrastructure management.
 
