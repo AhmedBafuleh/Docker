@@ -24,7 +24,8 @@ This approach simulates how modern companies build scalable data pipelines and a
 The system simulates a **trading-data platform** composed of several services working together, each running inside its own container.
 Docker Compose ensures these services launch simultaneously, interact seamlessly, and maintain consistent configurations.
 
-![Docker YAML](https://github.com/user-attachments/assets/174c4cd2-309e-4b09-9ad3-a2f0f74396f6)
+### Sequence Diagram UML
+<img width="1224" height="969" alt="Sequence Diagram" src="https://github.com/user-attachments/assets/905bc6ae-5412-46ac-94c8-56df27817e60" />
 
 ### Components and Relationships
 
