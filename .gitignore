@@ -1,0 +1,30 @@
+# Docker
+*.env
+.env
+*.log
+*.pid
+*.tar
+*.gz
+
+# Local volumes & data dumps (don’t commit DB data)
+**/data/
+**/tmp/
+**/backup/
+**/volumes/
+**/influxdb2_data/
+**/postgres_data/
+**/cassandra_data/
+
+# Python/Conda junk
+__pycache__/
+*.pyc
+.envs/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

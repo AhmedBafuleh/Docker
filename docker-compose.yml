@@ -1,0 +1,80 @@
+name: trading-tools-docker
+
+networks:
+  trading-net:
+
+volumes:
+  postgres_data:
+  cassandra_data:
+  influxdb2_data:
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    # ports:            # ← removed to avoid host port conflict
+    #   - "2181:2181"
+    networks: [trading-net]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "29092:29092"   # host access
+      # - "9092:9092"  # not needed on host
+    networks: [trading-net]
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    environment:
+      CASSANDRA_START_RPC: "true"
+    ports: ["9042:9042"]
+    volumes: ["cassandra_data:/var/lib/cassandra"]
+    networks: [trading-net]
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: tradingdb
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    networks: [trading-net]
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: admin12345
+      DOCKER_INFLUXDB_INIT_ORG: trading
+      DOCKER_INFLUXDB_INIT_BUCKET: prices
+      DOCKER_INFLUXDB_INIT_RETENTION: 30d
+    ports: ["8086:8086"]
+    volumes: ["influxdb2_data:/var/lib/influxdb2"]
+    networks: [trading-net]
+
+  anaconda:
+    image: continuumio/anaconda3:2024.02-1
+    container_name: anaconda
+    command: tail -f /dev/null
+    working_dir: /workspace
+    volumes: ["./workspace:/workspace"]
+    ports: ["8888:8888"]
+    networks: [trading-net]
