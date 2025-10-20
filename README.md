@@ -137,7 +137,44 @@ Login credentials:
 <img width="1920" height="1200" alt="Screenshot (93)" src="https://github.com/user-attachments/assets/482acd78-dcdd-4573-88c8-33e2cd704b8d" />
 
 **Kafka**
-Reachable at `localhost:29092`.
+Reachable at localhost:29092
+
+To verify that Kafka is running and working:
+
+<img width="1902" height="1140" alt="Screenshot (121)" src="https://github.com/user-attachments/assets/f3325718-9b40-4f90-9f7e-886f35e8dbda" />
+
+```bash
+# 1. Open a shell inside the Kafka container
+docker compose exec kafka bash
+
+# 2. Create a test topic
+kafka-topics --create \
+  --topic demo \
+  --bootstrap-server localhost:9092 \
+  --partitions 1 \
+  --replication-factor 1
+
+# 3. List topics
+kafka-topics --list --bootstrap-server localhost:9092
+
+# 4. Produce messages
+kafka-console-producer --broker-list localhost:9092 --topic demo
+# Type messages, e.g.:
+# hello
+# kafka is working!
+# Press Ctrl + C to stop
+
+# 5. Consume messages
+kafka-console-consumer --bootstrap-server localhost:9092 \
+  --topic demo --from-beginning
+# Should display:
+# hello
+# kafka is working!
+# Press Ctrl + C to exit
+
+# 6. Exit the container
+exit
+```
 
 **Anaconda**
 
